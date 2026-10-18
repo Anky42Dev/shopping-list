@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Список покупок</title>
+
+  <!-- Подключаем React, ReactDOM и Babel (чтобы писать JSX прямо в браузере) -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .app {
+      background: white;
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      margin-top: 0;
+      text-align: center;
+    }
+    form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      min-width: 0;
+    }
+    input.name {
+      flex: 2;
+    }
+    input.price {
+      flex: 1;
+    }
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #4caf50;
+      color: white;
+    }
+    button.delete {
+      background: #e53935;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .empty {
+      text-align: center;
+      color: #888;
+    }
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Компонент одного товара. Получает данные через props.
+    function ShoppingItem(props) {
+      return (
+        <li>
+          <span>{props.name} — {props.price} сом</span>
+          <button className="delete" onClick={() => props.onDelete(props.id)}>
+            Удалить
+          </button>
+        </li>
+      );
+    }
+
+    // Главный компонент приложения
+    function App() {
+      // state: список товаров
+      const [items, setItems] = React.useState([
+        { id: 1, name: "Хлеб", price: 40 },
+        { id: 2, name: "Молоко", price: 90 },
+      ]);
+
+      // state: значения полей ввода
+      const [name, setName] = React.useState("");
+      const [price, setPrice] = React.useState("");
+
+      // Добавление товара
+      function addItem(event) {
+        event.preventDefault();
+        if (name.trim() === "" || price === "") return;
+
+        const newItem = {
+          id: Date.now(),
+          name: name,
+          price: Number(price),
+        };
+
+        setItems([...items, newItem]);
+        setName("");
+        setPrice("");
+      }
+
+      // Удаление товара
+      function deleteItem(id) {
+        setItems(items.filter((item) => item.id !== id));
+      }
+
+      // Общая стоимость
+      const total = items.reduce((sum, item) => sum + item.price, 0);
+
+      return (
+        <div className="app">
+          <h1>Список покупок</h1>
+
+          <form onSubmit={addItem}>
+            <input
+              className="name"
+              type="text"
+              placeholder="Название"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              className="price"
+              type="number"
+              placeholder="Цена"
+              min="0"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+            <button type="submit">Добавить</button>
+          </form>
+
+          {items.length === 0 ? (
+            <p className="empty">Список пуст</p>
+          ) : (
+            <ul>
+              {items.map((item) => (
+                <ShoppingItem
+                  key={item.id}
+                  id={item.id}
+                  name={item.name}
+                  price={item.price}
+                  onDelete={deleteItem}
+                />
+              ))}
+            </ul>
+          )}
+
+          <div className="total">Итого: {total} сом</div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
